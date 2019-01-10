@@ -15,7 +15,7 @@ class Banner extends Controller
 
         $banner = BannerModel::getBannerByID($id);
 
-        if (empty($banner)) {
+        if (is_null($banner)) {   //Model 中使用 find 方法查找单条数据如果结果为空就是 null，但是使用 select 查询数据列表时是否为空则需要借助于模型方法 isEmpty 进行判断
             throw new SefaException([
                 'code' => 404,
                 'message' => '没有找到 Banner 资源',

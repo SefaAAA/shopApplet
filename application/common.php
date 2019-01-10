@@ -38,3 +38,21 @@ function curl($url, $type = 'POST', $data='', $https = false, $referer = 'http:/
     curl_close($ch);
     return $res;
 }
+
+/**
+ * @param int $length 所需字符串长度
+ * @return string 随机字符串
+ */
+function getRandChar($length = 32)
+{
+    $strPol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+    $maxKey = strlen($strPol) - 1;
+    $str = '';
+
+    for ($i = 0;$i < $length;$i++)
+    {
+        $str .= $strPol[rand(0, $maxKey)];
+    }
+
+    return $str;
+}

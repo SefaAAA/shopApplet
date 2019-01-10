@@ -14,9 +14,9 @@ use think\Exception;
 
 class SefaException extends Exception
 {
-    public $code = 500;
-    public $msg = '未知错误';
-    public $errorCode = 999;
+    public $code = 400;
+    public $msg = '错误的请求';
+    public $errorCode = 1000;
 
     public function __construct($params = [])
     {

@@ -13,9 +13,8 @@ class Token extends Controller
         (new TokenGet())->goCheck();
 
         $tokenService = new TokenService($code);
-
         $token = $tokenService->get($code);
 
-        return $token;
+        return ['token' => $token];
     }
 }
