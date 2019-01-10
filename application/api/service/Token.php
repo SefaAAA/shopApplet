@@ -32,7 +32,7 @@ class Token extends BaseService
         $this->wxLoginUrl = sprintf(config('wx.login_url'), $this->wxAppID, $this->wxAppSecret, $this->code);
     }
 
-    public function getToken()
+    public function get()
     {
         $loginRes = curl($this->wxLoginUrl);
 
