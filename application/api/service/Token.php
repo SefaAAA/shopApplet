@@ -28,7 +28,7 @@ class Token
         $this->code = $code;
         $this->wxAppID = config('wx.app_id');
         $this->wxAppSecret = config('wx.app_secret');
-        $this->wxLoginUrl = sprintf($this->wxLoginUrl, $this->wxAppID, $this->wxAppSecret, $this->code);
+        $this->wxLoginUrl = sprintf(config('wx.login_url'), $this->wxAppID, $this->wxAppSecret, $this->code);
     }
 
     public function get()
