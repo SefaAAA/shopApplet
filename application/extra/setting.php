@@ -8,4 +8,5 @@
 
 return [
     'img_prefix' => \think\Request::instance()->domain()."/static/images/",
+    'token_expire_in' => 7200,
 ];
