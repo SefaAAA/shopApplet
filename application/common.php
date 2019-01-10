@@ -30,7 +30,11 @@ function curl($url, $type = 'POST', $data='', $https = false, $referer = 'http:/
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 
     $res = curl_exec($ch);
-    curl_close($ch);
 
+    if ($res === false) {
+        \think\Log::record('cURL 请求出错：出错原因：'.curl_error($ch), 'error');
+    }
+
+    curl_close($ch);
     return $res;
 }
