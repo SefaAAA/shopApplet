@@ -116,14 +116,18 @@ class Token extends BaseService
     {
         $token = Request::instance()->header('token');
 
+        $exceptionInfo = [
+            'code' => 401,
+            'message' => 'token 有误',
+            'errorCode' => 1002
+        ];
+        if (empty($token)) {
+            throw new SefaException($exceptionInfo);
+        }
         $cacheToken = Cache::get($token);
 
         if (empty($cacheToken)) {
-            throw new SefaException([
-                'code' => 401,
-                'message' => 'token 已过期或无效',
-                'errorCode' => 1002
-            ]);
+            throw new SefaException($exceptionInfo);
         }
 
         if (!is_array($cacheToken)) {
