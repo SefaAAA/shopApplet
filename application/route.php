@@ -27,6 +27,8 @@ Route::get('category', 'api/category/getallcategories');
 
 Route::post('token/user', 'api/token/gettoken');
 
+Route::post('address', 'api/address/createupdateuseraddress');
+
 return [
     '__pattern__' => [
         'name' => '\w+',

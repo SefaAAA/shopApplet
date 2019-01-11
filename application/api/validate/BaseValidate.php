@@ -64,7 +64,7 @@ class BaseValidate extends Validate
         return true;
     }
 
-    protected function isEmpty($value)
+    protected function notEmpty($value)
     {
         return !empty($value);
     }

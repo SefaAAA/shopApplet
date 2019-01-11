@@ -10,8 +10,10 @@ namespace app\api\service;
 
 
 use app\lib\exception\SefaException;
+use think\Cache;
 use think\Exception;
 use app\api\model\User as UserModel;
+use think\Request;
 
 class Token extends BaseService
 {
@@ -102,5 +104,41 @@ class Token extends BaseService
 
         cache($key, $value, $expireIn);
         return $key;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @throws Exception
+     * @throws SefaException
+     */
+    public static function getCurrentUserTokenVar($key)
+    {
+        $token = Request::instance()->header('token');
+
+        $cacheToken = Cache::get($token);
+
+        if (empty($cacheToken)) {
+            throw new SefaException([
+                'code' => 401,
+                'message' => 'token 已过期或无效',
+                'errorCode' => 1002
+            ]);
+        }
+
+        if (!is_array($cacheToken)) {
+            $cacheToken = json_decode($cacheToken, true);
+        }
+
+        if (!array_key_exists($key, $cacheToken)) {
+            throw new Exception('获取用户 Token 信息时传递的 key 不存在');
+        }
+
+        return $cacheToken[$key];
+    }
+
+    public static function getCurrentUID()
+    {
+        return self::getCurrentUserTokenVar('uid');
     }
 }
