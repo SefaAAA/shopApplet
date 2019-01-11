@@ -12,7 +12,8 @@ class Address extends Controller
 {
     public function createUpdateUserAddress()
     {
-        (new AddressInfo())->goCheck();
+        $data = (new AddressInfo())->goCheck(true);
+
         //根据用户Token获取用户信息，然后判断用户地址是否存在，如果存在则更新，不存在则新增
         $uid = TokenService::getCurrentUID();
 
@@ -24,19 +25,11 @@ class Address extends Controller
                 'errorCode' => 1003
             ]);
         }
-        $newAddress = [
-            'consignee' => input('consignee'),
-            'mobile' => input('mobile'),
-            'country' => input('country'),
-            'province' => input('province'),
-            'city' => input('city'),
-            'detail' => input('detail'),
-        ];
 
         if (empty($user->address)) {
-            $user->address()->save($newAddress);
+            $user->address()->save($data);
         } else {
-            $user->address->save($newAddress);
+            $user->address->save($data);
         }
     }
 }

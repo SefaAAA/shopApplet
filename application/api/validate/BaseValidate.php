@@ -15,7 +15,13 @@ use think\Validate;
 
 class BaseValidate extends Validate
 {
-    public function goCheck()
+    /**
+     * 定义控制器参数统一验证方法
+     * @param bool $filter 是否需要同时返回过滤后的请求参数
+     * @return array|bool
+     * @throws SefaException
+     */
+    public function goCheck($filter = false)
     {
         $params = Request::instance()->param();
 
@@ -33,9 +39,37 @@ class BaseValidate extends Validate
                 'message' => $this->error,
                 'errorCode' => '1000'
             ]);
-        } else {
-            return true;
         }
+        //如果需要可以同时返回过滤后的数据
+        if ($filter) {
+            return $this->getDataByRule($params);
+        }
+
+        return true;
+    }
+
+    /**
+     * 参照验证器定义的规则过滤用户请求参数，包括 GET、POST、PUT 三种请求方式
+     * @param array $originData 所有的请求参数，相当于$_REQUEST
+     * @return array 过滤后的请求参数
+     * @throws SefaException
+     */
+    protected function getDataByRule($originData)
+    {
+        if (array_key_exists('user_id', $originData) || array_key_exists('uid', $originData)) {
+            $uidField = $originData['user_id'] ? 'user_id' : 'uid';
+            throw new SefaException([
+                'message' => '参数中含有非法参数'.$uidField
+            ]);
+        }
+
+        $validData = [];
+
+        foreach ($this->rule as $key => $value) {
+            $validData[$key] = $originData[$key];
+        }
+
+        return $validData;
     }
 
     protected function isPositiveInteger($value, $rule = '', $data = '', $field = '')
@@ -44,7 +78,6 @@ class BaseValidate extends Validate
             return true;
         } else {
             return false;
-            return $field.'必须是正整数';
         }
     }
 
