@@ -17,8 +17,11 @@ Route::get('banner/:id', 'api/banner/getbanner');
 Route::get('theme', 'api/theme/getsimplelist');
 Route::get('theme/:id', 'api/theme/getcomplexone');
 
-Route::get('product/recent', 'api/product/getrecent');
-Route::get('product/by_category', 'api/product/getbycatid');
+Route::group('product', function() {
+    Route::get('recent', 'api/product/getrecent');
+    Route::get('by_category/:id', 'api/product/getbycatid');
+    Route::get(':id', 'api/product/getone');
+}, [], ['id' => '\d+']);
 
 Route::get('category', 'api/category/getallcategories');
 

@@ -46,4 +46,21 @@ class Product extends Controller
         $productList->hidden(['summary']);
         return $productList;
     }
+
+    public function getOne($id)
+    {
+        (new IDMustBePositiveInt())->goCheck();
+
+        $info = ProductModel::getDetail($id);
+
+        if (is_null($info)) {
+            throw new SefaException([
+                'code' => 404,
+                'message' => '指定商品不存在',
+                'errorCode' => 4002
+            ]);
+        }
+
+        return $info;
+    }
 }
