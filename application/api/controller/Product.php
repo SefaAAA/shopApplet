@@ -63,4 +63,9 @@ class Product extends Controller
 
         return $info;
     }
+
+    public function deleteOne($id)
+    {
+
+    }
 }
