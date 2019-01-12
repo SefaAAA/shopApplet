@@ -9,6 +9,7 @@
 namespace app\api\service;
 
 
+use app\lib\enum\ScopeEnum;
 use app\lib\exception\SefaException;
 use think\Cache;
 use think\Exception;
@@ -96,7 +97,7 @@ class Token extends BaseService
     {
         $cacheValue = array_merge($loginRes, [
             'uid' => $uid,
-            'scope' => 16
+            'scope' => ScopeEnum::User, //缓存身份权限标识
         ]);
         $value = json_encode($cacheValue);
         $key = self::generateToken();
@@ -107,6 +108,7 @@ class Token extends BaseService
     }
 
     /**
+     * 获取用户 Token 令牌相关的某个信息
      * @param $key
      * @return mixed
      * @throws Exception
