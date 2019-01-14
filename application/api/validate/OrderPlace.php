@@ -22,7 +22,11 @@ class OrderPlace extends BaseValidate
     private $singleRule = [
         'product_id' => 'require|isPositiveInteger',
         'count' => 'require|isPositiveInteger'
+    ];
 
+    private $singleMessage = [
+        'product_id' => '商品订单编号必须是正整数',
+        'count' => '商品购买数量必须是正整数'
     ];
 
     /**
@@ -41,11 +45,12 @@ class OrderPlace extends BaseValidate
                 return false;
             }
         }
+        return true;
     }
     //单独验证提交的订单信息中每个商品的参数信息
     private function checkProduct($value)
     {
-        $validate = new BaseValidate($this->singleRule);
+        $validate = new BaseValidate($this->singleRule, $this->singleMessage);
 
         return $validate->check($value);
     }
