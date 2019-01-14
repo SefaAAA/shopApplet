@@ -2,9 +2,9 @@
 
 namespace app\api\controller;
 
-use app\api\model\OrderProduct;
 use app\api\validate\OrderPlace;
 use app\api\service\Token as TokenService;
+use app\api\service\Order as OrderService;
 
 class Order extends BaseController
 {
@@ -20,10 +20,19 @@ class Order extends BaseController
 
         $uid = TokenService::getCurrentUserTokenVar('uid');
 
-        $orderService = new OrderProduct();
+        $order = new OrderService();
 
-        $status = $orderService->replace($uid, $submitOrder);
-
-        return $status;
+        return $order->place($uid, $submitOrder);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
