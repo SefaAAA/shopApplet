@@ -29,6 +29,8 @@ Route::post('token/user', 'api/token/gettoken');
 
 Route::post('address', 'api/address/createupdateuseraddress');
 
+Route::post('order', 'api/order/placeOrder');
+
 return [
     '__pattern__' => [
         'name' => '\w+',
