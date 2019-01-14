@@ -150,7 +150,7 @@ class Order
             }
             $status['goods_amount'] += $productStatus['total_price'];
 
-            array_push($status, $productStatus);
+            array_push($status['product_status'], $productStatus);
         }
 
         return $status;
