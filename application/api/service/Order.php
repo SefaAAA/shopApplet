@@ -105,6 +105,15 @@ class Order
         return date('YmdHis').$mssecPart.mt_rand(100, 999);
     }
 
+    /**
+     * 获取当前用户的收货地址
+     * @return array
+     * @throws Exception
+     * @throws SefaException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     private function getUserAddress()
     {
         $userAddress = UserAddress::where('user_id', '=', $this->uid)->find();
@@ -177,7 +186,7 @@ class Order
                 $productStatus['count'] = $oCount;  //购买的商品数量
                 $productStatus['price'] = $products[$i]['price'];
                 $productStatus['total_price'] = $products[$i]['price'] * $oCount;
-                $productStatus['stock_enough'] = $products[$i]['count'] >= $oCount ? true : false;
+                $productStatus['stock_enough'] = $products[$i]['stock'] >= $oCount ? true : false;
                 return $productStatus;
             }
         }
