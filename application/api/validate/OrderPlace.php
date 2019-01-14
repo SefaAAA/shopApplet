@@ -15,6 +15,10 @@ class OrderPlace extends BaseValidate
         'products' => 'checkProducts'
     ];
 
+    protected $message = [
+        'products' => '提交的订单参数不合法'
+    ];
+
     private $singleRule = [
         'product_id' => 'require|isPositiveInteger',
         'count' => 'require|isPositiveInteger'
