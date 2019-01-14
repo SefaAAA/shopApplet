@@ -10,6 +10,7 @@ namespace app\api\service;
 
 
 use app\lib\enum\ScopeEnum;
+use app\lib\exception\ForbiddenException;
 use app\lib\exception\SefaException;
 use think\Cache;
 use think\Exception;
@@ -120,7 +121,7 @@ class Token extends BaseService
 
         $exceptionInfo = [
             'code' => 401,
-            'message' => 'token 有误',
+            'message' => 'token 无效或已经过期',
             'errorCode' => 1002
         ];
         if (empty($token)) {
@@ -137,7 +138,7 @@ class Token extends BaseService
         }
 
         if (!array_key_exists($key, $cacheToken)) {
-            throw new Exception('获取用户 Token 信息时传递的 key 不存在');
+            throw new Exception('获取用户 Token 信息时传递的键 '.$key.' 不存在');
         }
 
         return $cacheToken[$key];
@@ -146,5 +147,33 @@ class Token extends BaseService
     public static function getCurrentUID()
     {
         return self::getCurrentUserTokenVar('uid');
+    }
+
+    /**
+     * 前端小程序用户和管理员都能够访问的接口限制
+     * @throws Exception
+     * @throws SefaException
+     */
+    public function needPrimaryScope()
+    {
+        $scope = self::getCurrentUserTokenVar('scope');
+
+        if ($scope < ScopeEnum::User) {
+            throw new ForbiddenException();
+        }
+    }
+
+    /**
+     * 不能让管理员访问的接口限制，exclusive 译为：排它的， 独有的
+     * @throws Exception
+     * @throws SefaException
+     */
+    public function needExclusiveScope()
+    {
+        $scope = self::getCurrentUserTokenVar('scope');
+
+        if ($scope != ScopeEnum::User) {
+            throw new ForbiddenException();
+        }
     }
 }
