@@ -46,7 +46,7 @@ class Order
             'province' => '',
             'city' => '',
             'district' => '',
-            'address' => '',
+            'detail' => '',
 //            'snap_name' => '',   //下面两个字段表示订单中如果包含多个商品在订单列表中显示的快照信息
 //            'snap_img' => ''
         ];
@@ -54,11 +54,11 @@ class Order
             //整理订单的基本信息
             $orderInfo['user_id'] = $this->uid;
             $orderInfo['order_sn'] = $this->generateOrderSn();
-            $orderInfo['total_count'] = $orderStatus['total_count'];
-            $orderInfo['product_amount'] = $orderStatus['product_amount'];
+            $orderInfo['total_count'] = $orderStatus['total_count'];    //该笔订单商品总数
+            $orderInfo['product_amount'] = $orderStatus['product_amount'];  //该笔订单商品价格总金额
     //        $orderInfo['product_status'] = $orderStatus['product_status'];  //订单中所有商品信息，没有按照视频教程得做饭存入数据库
 
-            //收集收货地址信息，目前每个用户只能有一个收货地址
+            //用户订单收货人及订单信息收集，目前每个用户只能有一个收货地址
             $address = $this->getUserAddress();
             $orderInfo['consignee'] = $address['consignee'];
             $orderInfo['mobile'] = $address['mobile'];
@@ -71,21 +71,23 @@ class Order
             //订单列表页订单显示快照信息
     //         $orderInfo['snap_name'] = $this->products[0]['name'];
     //         $orderInfo['snap_img'] = $this->products[0]['main_img_url'];
-            $newOrder = OrderInfo::create($orderInfo);
+//            $newOrder = OrderInfo::create($orderInfo);    // 使用静态方法不能过滤非数据表字段数据
+            $newOrder = new OrderInfo($orderInfo);
+            $newOrder->allowField(true)->save();
 
             $orderId = $newOrder->id;
-
             $orderProducts = [];
+            //遍历库存检测时整理出来的商品信息整理成 order_product 表的入库信息
             foreach ($orderStatus['product_status'] as $product) {
                 $orderProduct['order_id'] = $orderId;
                 $orderProduct['product_id'] = $product['id'];
-                $orderProduct['product_name'] = $product['product_name'];
+                $orderProduct['product_name'] = $product['name'];
                 $orderProduct['product_price'] = $product['price'];
                 $orderProduct['product_number'] = $product['count'];
                 array_push($orderProducts, $orderProduct);
             }
 
-            $newOrder->order_goods()->saveAll($orderProducts);
+            $newOrder->order_goods()->allowField(true)->saveAll($orderProducts);
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -98,39 +100,27 @@ class Order
         ];
     }
 
-    public function generateOrderSn()
+    //根据用户提交的订单信息从数据库查询对应的商品信息
+    private function getProductsByOrder($oProducts)
     {
-        list($sec, $mssec) = explode(' ', microtime());
-        $mssecPart = floor($mssec * 1000);
-        return date('YmdHis').$mssecPart.mt_rand(100, 999);
-    }
-
-    /**
-     * 获取当前用户的收货地址
-     * @return array
-     * @throws Exception
-     * @throws SefaException
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    private function getUserAddress()
-    {
-        $userAddress = UserAddress::where('user_id', '=', $this->uid)->find();
-
-        if (is_null($userAddress)) {
-            throw new SefaException([
-                'code' => 404,
-                'message' => '用户收货地址不存在',
-                'errorCode' => 5001
-            ]);
+//        循环查询数据库不可取！！！换种思路：先从提交的订单信息中获取 product_id 的集合，然后用 in 语句进行查询
+//        foreach ($oProducts as $product) {
+//            //code...循环查询数据库不可取！！！
+//        }
+        $oProductsIDs = [];
+        foreach ($oProducts as $product) {
+            array_push($oProductsIDs, $product['product_id']);
         }
 
-        return $userAddress->toArray();
+        $products = ProductModel::all($oProductsIDs)
+            ->visible(['id', 'name', 'price', 'stock', 'main_img_url'])
+            ->toArray();
+
+        return $products;
     }
 
     /**
-     *
+     * 对提交的订单信息一一对比数据库，同时取出订单中商品的额信息方便后面的 order_product 表数据入库
      * @throws SefaException
      */
     private function getOrderStatus()
@@ -190,7 +180,7 @@ class Order
                 return $productStatus;
             }
         }
-
+        //遍历数据库查询出的数据以后没找到当前商品则抛出错误
         if (!$productExists) {  //数据库中没有找到该商品
             throw new SefaException([
                 'code' => 404,
@@ -200,22 +190,40 @@ class Order
         }
     }
 
-    //根据用户提交的订单信息从数据库查询对应的商品信息
-    private function getProductsByOrder($oProducts)
+    /**
+     * 生成一个新的订单号
+     * @access public
+     * @return string
+     */
+    public function generateOrderSn()
     {
-//        循环查询数据库不可取！！！换种思路：先从提交的订单信息中获取 product_id 的集合，然后用 in 语句进行查询
-//        foreach ($oProducts as $product) {
-//            //code...循环查询数据库不可取！！！
-//        }
-        $oProductsIDs = [];
-        foreach ($oProducts as $product) {
-            array_push($oProductsIDs, $product['product_id']);
+        list($sec, $mssec) = explode(' ', microtime());
+        $mssecPart = floor($mssec * 1000);
+        $orderSn = date('YmdHis').$mssecPart.mt_rand(100, 999);
+        return $orderSn;
+    }
+
+    /**
+     * 获取当前用户的收货地址
+     * @return array
+     * @throws Exception
+     * @throws SefaException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    private function getUserAddress()
+    {
+        $userAddress = UserAddress::where('user_id', '=', $this->uid)->find();
+
+        if (is_null($userAddress)) {
+            throw new SefaException([
+                'code' => 404,
+                'message' => '用户收货地址不存在',
+                'errorCode' => 5001
+            ]);
         }
 
-        $products = ProductModel::all($oProductsIDs)
-            ->visible(['id', 'name', 'price', 'stock', 'main_img_url'])
-            ->toArray();
-
-        return $products;
+        return $userAddress->toArray();
     }
 }
