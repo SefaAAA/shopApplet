@@ -8,6 +8,7 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
+use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
@@ -87,7 +88,9 @@ class Order
                 array_push($orderProducts, $orderProduct);
             }
 
-            $newOrder->order_goods()->allowField(true)->saveAll($orderProducts);
+//            $newOrderGoods = new OrderProduct();
+//            $newOrderGoods->allowField(true)->saveAll($orderProducts);
+            $newOrder->orderGoods()->saveAll($orderProducts);   //使用关联新增的方式没有 allowField 这样的方法对非数据表字段进行过滤
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -139,7 +142,7 @@ class Order
                 $status['pass'] = false;    //库存检测标识为未通过
             }
             $status['product_amount'] += $productStatus['total_price'];
-
+            $status['total_count'] += $productStatus['count'];
             array_push($status['product_status'], $productStatus);
         }
 
@@ -197,7 +200,7 @@ class Order
      */
     public function generateOrderSn()
     {
-        list($sec, $mssec) = explode(' ', microtime());
+        list($mssec, $sec) = explode(' ', microtime());
         $mssecPart = floor($mssec * 1000);
         $orderSn = date('YmdHis').$mssecPart.mt_rand(100, 999);
         return $orderSn;
