@@ -8,7 +8,6 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
-use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
