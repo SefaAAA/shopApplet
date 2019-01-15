@@ -38,8 +38,8 @@ class Order
         //整理订单信息，订单信息初始化
         $orderInfo = [
             'order_amount' => 0, //订单商品总数量
-            'goods_amount' => 0,    //订单商品总金额
-//            'product_status' => [],  //订单商品信息整理后的结果，和上面的 goods_amount 一样在库存检测时已经整理好了
+            'product_amount' => 0,    //订单商品总金额
+//            'product_status' => [],  //订单商品信息整理后的结果，和上面的 product_amount 一样在库存检测时已经整理好了
             'consignee' => '',
             'mobile' => '', //以下几个字段是关于订单收货人的信息
             'country' => '',
@@ -55,7 +55,7 @@ class Order
             $orderInfo['user_id'] = $this->uid;
             $orderInfo['order_sn'] = $this->generateOrderSn();
             $orderInfo['total_count'] = $orderStatus['total_count'];
-            $orderInfo['goods_amount'] = $orderStatus['goods_amount'];
+            $orderInfo['product_amount'] = $orderStatus['product_amount'];
     //        $orderInfo['product_status'] = $orderStatus['product_status'];  //订单中所有商品信息，没有按照视频教程得做饭存入数据库
 
             //收集收货地址信息，目前每个用户只能有一个收货地址
@@ -137,7 +137,7 @@ class Order
     {
         $status = [ //初始化订单对比结果数据
             'pass' => true, //库存量检测是否通过
-            'goods_amount' => 0, //订单中商品总金额
+            'product_amount' => 0, //订单中商品总金额
             'product_status' => [],  //订单下面所有商品的详细信息
             'total_count' => 0  // 订单中所有商品的数量
         ];
@@ -148,7 +148,7 @@ class Order
             if (!$productStatus['stock_enough']) {
                 $status['pass'] = false;    //库存检测标识为未通过
             }
-            $status['goods_amount'] += $productStatus['total_price'];
+            $status['product_amount'] += $productStatus['total_price'];
 
             array_push($status['product_status'], $productStatus);
         }
