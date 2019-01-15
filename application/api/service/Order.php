@@ -8,9 +8,11 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
+use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
+use think\Db;
 use think\Exception;
 
 class Order
@@ -50,6 +52,7 @@ class Order
 //            'snap_name' => '',   //下面两个字段表示订单中如果包含多个商品在订单列表中显示的快照信息
 //            'snap_img' => ''
         ];
+        Db::startTrans();   //订单及订单商品入库流程开启事务
         try {
             //整理订单的基本信息
             $orderInfo['user_id'] = $this->uid;
@@ -69,8 +72,8 @@ class Order
             $orderInfo['detail'] = $address['detail'];
 
             //订单列表页订单显示快照信息
-    //         $orderInfo['snap_name'] = $this->products[0]['name'];
-    //         $orderInfo['snap_img'] = $this->products[0]['main_img_url'];
+//            $orderInfo['snap_name'] = $this->products[0]['name'];
+//            $orderInfo['snap_img'] = $this->products[0]['main_img_url'];
 //            $newOrder = OrderInfo::create($orderInfo);    // 使用静态方法不能过滤非数据表字段数据
             $newOrder = new OrderInfo($orderInfo);
             $newOrder->allowField(true)->save();
@@ -87,8 +90,12 @@ class Order
                 array_push($orderProducts, $orderProduct);
             }
 
-            $newOrder->order_goods()->allowField(true)->saveAll($orderProducts);
+//            $newOrderGoods = new OrderProduct();
+//            $newOrderGoods->allowField(true)->saveAll($orderProducts);   //使用关联新增的方式没有 allowField 这样的方法对非数据表字段进行过滤
+            $newOrder->orderGoods()->saveAll($orderProducts);
+            Db::commit();
         } catch (Exception $ex) {
+            Db::rollback();
             throw $ex;
         }
 
@@ -139,7 +146,7 @@ class Order
                 $status['pass'] = false;    //库存检测标识为未通过
             }
             $status['product_amount'] += $productStatus['total_price'];
-
+            $status['total_count'] += $productStatus['count'];
             array_push($status['product_status'], $productStatus);
         }
 
@@ -197,7 +204,7 @@ class Order
      */
     public function generateOrderSn()
     {
-        list($sec, $mssec) = explode(' ', microtime());
+        list($mssec, $sec) = explode(' ', microtime());
         $mssecPart = floor($mssec * 1000);
         $orderSn = date('YmdHis').$mssecPart.mt_rand(100, 999);
         return $orderSn;
