@@ -8,7 +8,6 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
-use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
@@ -89,7 +88,7 @@ class Order
                 $orderProduct['product_number'] = $product['count'];
                 array_push($orderProducts, $orderProduct);
             }
-
+            
 //            $newOrderGoods = new OrderProduct();
 //            $newOrderGoods->allowField(true)->saveAll($orderProducts);   //使用关联新增的方式没有 allowField 这样的方法对非数据表字段进行过滤
             $newOrder->orderGoods()->saveAll($orderProducts);
