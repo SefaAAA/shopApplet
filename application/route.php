@@ -31,6 +31,7 @@ Route::post('address', 'api/address/createupdateuseraddress');
 
 Route::post('order', 'api/order/placeOrder');
 
+Route::post('pay/prepay', 'api/pay/getPrepayOrder');
 return [
     '__pattern__' => [
         'name' => '\w+',

@@ -8,6 +8,7 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
+use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
@@ -129,7 +130,7 @@ class Order
      * 对提交的订单信息一一对比数据库，同时取出订单中商品的额信息方便后面的 order_product 表数据入库
      * @throws SefaException
      */
-    private function getOrderStatus()
+    public function getOrderStatus()
     {
         $status = [ //初始化订单对比结果数据
             'pass' => true, //库存量检测是否通过
@@ -231,5 +232,26 @@ class Order
         }
 
         return $userAddress->toArray();
+    }
+
+    /**
+     * 复用了订单提交接口中封装好的一些方法提供一个库存量检测的公用方法
+     * @param int $orderID 已经生成的 order_id
+     * @return array
+     * @throws SefaException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function checkOrderStock($orderID)
+    {
+        $this->oProducts = OrderProduct::where('order_id', '=', $orderID)
+            ->select();
+
+        $this->products = $this->getProductStatus($this->oProducts);
+
+        $status = $this->getOrderStatus($this->oProducts, $this->products);
+
+        return $status;
     }
 }

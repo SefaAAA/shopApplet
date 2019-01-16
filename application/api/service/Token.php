@@ -36,6 +36,12 @@ class Token extends BaseService
         $this->wxLoginUrl = sprintf(config('wx.login_url'), $this->wxAppID, $this->wxAppSecret, $this->code);
     }
 
+    /**
+     * 获取用户令牌
+     * @return mixed
+     * @throws Exception
+     * @throws SefaException
+     */
     public function get()
     {
         $loginRes = curl($this->wxLoginUrl);
@@ -175,5 +181,12 @@ class Token extends BaseService
         if ($scope != ScopeEnum::User) {
             throw new ForbiddenException();
         }
+    }
+
+    public static function isValidOperate($dataUID)
+    {
+        $currentUID = self::getCurrentUID();
+
+        return $dataUID == $currentUID ? true : false;
     }
 }
