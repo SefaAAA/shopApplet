@@ -7,7 +7,7 @@ class OrderInfo extends BaseModel
     protected $autoWriteTimestamp = true;
 
     protected $insert = [
-        'status' => 0,
+        'status' => 1,
     ];
 
     public function orderGoods()

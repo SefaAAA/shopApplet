@@ -13,14 +13,14 @@ class Pay extends BaseController
 
     /**
      * 生成预支付订单信息给前端小程序
-     * @param $orderID
+     * @param int $id 预支付订单 ID
      * @throws \app\lib\exception\SefaException
      */
-    public function getPrepayOrder($orderID)
+    public function getPrepayOrder($id)
     {
         (new IDMustBePositiveInt())->goCheck();
 
-        $payService = new payService($orderID);
+        $payService = new payService($id);
 
         $payService->pay();
     }

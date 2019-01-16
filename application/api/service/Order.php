@@ -8,6 +8,7 @@
 
 namespace app\api\service;
 use app\api\model\OrderInfo;
+use app\api\model\OrderProduct;
 use app\api\model\Product as ProductModel;
 use app\api\model\UserAddress;
 use app\lib\exception\SefaException;
@@ -133,13 +134,16 @@ class Order
     {
         $status = [ //初始化订单对比结果数据
             'pass' => true, //库存量检测是否通过
-            'product_amount' => 0, //订单中商品总金额
             'product_status' => [],  //订单下面所有商品的详细信息
-            'total_count' => 0  // 订单中所有商品的数量
+            'total_count' => 0,  // 订单中所有商品的数量
+            'product_amount' => 0, //订单中商品总金额
+            'order_amount' => 0, //订单应支付金额，由于项目功能简单，没有快递费用，发票费用以及各种优惠折扣等等复杂的逻辑，所以，该字段暂定和 product_amount 字段一致
         ];
 
         //用户提交的订单信息与数据库查询出来的数据进行对比检测库存量，同时对查询出的订单商品信息进行整理
         foreach ($this->oProducts as $oProduct) {
+            // 如果是用户首次提交订单信息，$oProduct 中的 count 字段表示当前商品数量，如果是从 order_product 表中取出订单数据，则用 product_number 字段表示当前商品数量，所以作此处理以兼容两种情况
+            $oProduct['count'] = !empty($oProduct['count']) ? $oProduct['count'] : $oProduct['product_number'];
             $productStatus = $this->getProductStatus($oProduct['product_id'], $oProduct['count'], $this->products);
             if (!$productStatus['stock_enough']) {
                 $status['pass'] = false;    //库存检测标识为未通过
@@ -148,7 +152,7 @@ class Order
             $status['total_count'] += $productStatus['count'];
             array_push($status['product_status'], $productStatus);
         }
-
+        $status['order_amount'] = $status['product_amount'];
         return $status;
     }
 
@@ -244,12 +248,11 @@ class Order
      */
     public function checkOrderStock($orderID)
     {
-        $this->oProducts = OrderProduct::where('order_id', '=', $orderID)
-            ->select();
+        $this->oProducts = OrderProduct::where('order_id', '=', $orderID)->select()->toArray();
 
-        $this->products = $this->getProductStatus($this->oProducts);
+        $this->products = $this->getProductsByOrder($this->oProducts);
 
-        $status = $this->getOrderStatus($this->oProducts, $this->products);
+        $status = $this->getOrderStatus();
 
         return $status;
     }

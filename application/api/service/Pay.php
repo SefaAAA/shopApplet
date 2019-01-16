@@ -44,7 +44,7 @@ class Pay
             ]);
         }
 
-        $this->prePay($status['order_amount']);
+        return $this->prePay($status['order_amount']);
     }
 
     private function prePay($totalFee)
@@ -52,18 +52,62 @@ class Pay
         $openid = TokenService::getCurrentUserTokenVar('openid');
 
         $wxOrderData = new \WxPayUnifiedOrder();    //实例化统一下单输入类
+        $wxOrderData->SetAppid(config('wx.app_id'));
         $wxOrderData->SetOut_trade_no($this->orderSn);
         $wxOrderData->SetTrade_type('JSAPI');
         $wxOrderData->SetTotal_fee($totalFee * 100);
         $wxOrderData->SetBody('XXX');   // 商品名称
         $wxOrderData->SetOpenid($openid);
-        $wxOrderData->SetNotify_url('');  //微信支付异步通知地址
+        $wxOrderData->SetNotify_url('http://qq.com');  //微信支付异步通知地址
 
-        $prePayResult = \WxPayApi::unifiedOrder($wxOrderData);   //请求统一下单接口
+        $wxPayConfig = new \WxPayConfig();
+        $prePayResult = \WxPayApi::unifiedOrder($wxPayConfig, $wxOrderData);   //请求统一下单接口
 
-        if ($prePayResult['return_code'] != 'SUCCESS' || $prePayResult['result_code'] != 'SUCCESS') {
-            Log::record('订单预支付失败：失败原因：'.json_encode($prePayResult, 320), 'error');
+        $errorMsg = '';
+        if (empty($prePayResult)) {
+            $errorMsg = '请求出错';
+        } else {
+            if ($prePayResult['return_code'] != 'SUCCESS') {
+                $errorMsg = $prePayResult['return_msg'];
+            }
+            if ($prePayResult['return_code'] == 'SUCCESS' && $prePayResult['result_code'] != 'SUCCESS') {
+                $errorMsg = $prePayResult['err_code_des'].'('.$prePayResult['err_code'].')';
+            }
         }
+
+        if (!empty($errorMsg)) {
+            Log::record('订单预支付失败：失败原因：'.json_encode($prePayResult, 320), 'error');
+            throw new SefaException([
+                'code' => 400,
+                'message' => '支付失败，失败原因：'.$errorMsg,
+                'errorCode' => 6004
+            ]);
+        } else {
+            //如果预支付成功，保存微信返回的 prepay_id 到 order 表，然后拼凑前端支付需要的参数进行返回
+            OrderInfo::where('id', '=', $this->orderID)->update(['prepay_id' => $prePayResult['prepay_id']]);
+
+            return $this->getJsPaySignature($prePayResult);
+        }
+    }
+
+    private function getJsPaySignature($prepayResult)
+    {
+        $jsApiData = new \WxPayJsApiPay();
+        $jsApiData->SetAppid(config('wx.app_id'));
+        $jsApiData->SetTimeStamp((string)time());
+        $jsApiData->SetNonceStr(md5(time().mt_rand(100, 999)));
+        $jsApiData->SetPackage('prepay_id='.$prepayResult['prepay_id']);
+        $jsApiData->SetSignType('md5');
+
+        $sign = $jsApiData->MakeSign(); //其中 key 值后缀后再加密
+
+        $rawValues = $jsApiData->GetValues();   //将对象转换为数组形式
+
+        $rawValues['sign'] = $sign; //原始数据中加入签名
+
+        unset($rawValues['app_id']);
+
+        return $rawValues;
     }
 
     public function checkOrderValid()
