@@ -30,8 +30,12 @@ Route::post('token/user', 'api/token/gettoken');
 Route::post('address', 'api/address/createupdateuseraddress');
 
 Route::post('order', 'api/order/placeOrder');
+Route::get('order/by_user', 'api/order/getorderbyuser');
+Route::get('order/detail', 'api/order/getdetail');
 
 Route::post('pay/prepay', 'api/pay/getPrepayOrder');
+Route::post('pay/notify', 'api/pay/receiveNotify');
+
 return [
     '__pattern__' => [
         'name' => '\w+',

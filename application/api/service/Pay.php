@@ -58,7 +58,7 @@ class Pay
         $wxOrderData->SetTotal_fee($totalFee * 100);
         $wxOrderData->SetBody('XXX');   // 商品名称
         $wxOrderData->SetOpenid($openid);
-        $wxOrderData->SetNotify_url('http://qq.com');  //微信支付异步通知地址
+        $wxOrderData->SetNotify_url(url('pay/notify', '', '', true));  //微信支付异步通知地址
 
         $wxPayConfig = new \WxPayConfig();
         $prePayResult = \WxPayApi::unifiedOrder($wxPayConfig, $wxOrderData);   //请求统一下单接口
