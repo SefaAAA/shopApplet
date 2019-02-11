@@ -6,11 +6,12 @@ use app\api\model\User as UserModel;
 use app\api\service\Token as TokenService;
 use app\api\validate\AddressInfo;
 use app\lib\exception\SefaException;
+use app\api\model\UserAddress;
 
 class Address extends BaseController
 {
     protected $beforeActionList = [
-        'checkPrimaryScope' => ['only' => 'createUpdateUserAddress'],
+        'checkPrimaryScope' => ['only' => 'createUpdateUserAddress,getUserAddress'],
     ];
 
     public function createUpdateUserAddress()
@@ -31,8 +32,31 @@ class Address extends BaseController
 
         if (empty($user->address)) {
             $user->address()->save($data);
+            $code = 201;
         } else {
             $user->address->save($data);
+            $code = 202;
         }
+
+        return json([
+            'message' => 'OK'
+        ], $code);
+    }
+
+    public function getUserAddress() {
+        $uid = TokenService::getCurrentUID();
+
+        $address = UserAddress::where('user_id', '=', $uid)
+            ->find();
+
+        if (is_null($address)) {
+            throw new SefaException([
+                'code' => 404,
+                'message' => '用户还没有添加收货地址',
+                'errorCode' => '7000'
+            ]);
+        }
+
+        return $address;
     }
 }

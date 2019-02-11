@@ -17,6 +17,7 @@ class AddressInfo extends BaseValidate
         'country' => 'require|notEmpty',
         'province' => 'require|notEmpty',
         'city' => 'require|notEmpty',
+        'district' => 'require|notEmpty',
         'detail' => 'require|notEmpty',
     ];
 }

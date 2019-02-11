@@ -12,7 +12,7 @@ class Product extends Controller
 {
     public function getRecent($count = 15)
     {
-        (new Count())->goCheck($count);
+        (new Count())->goCheck();
 
         $productList = ProductModel::getMostRecent($count);
 

@@ -130,8 +130,10 @@ class Pay
                 'errorCode' => 6002
             ]);
         }
+
+        $orderStatus = $order->getData('status');
         //检测订单是否已经支付
-        if ($order->status != OrderStatusEnum::UNPAID) {
+        if ($orderStatus != OrderStatusEnum::UNPAID) {
             throw new SefaException([
                 'message' => '订单已经被支付',
                 'errorCode' => 6003

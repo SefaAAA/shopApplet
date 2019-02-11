@@ -87,12 +87,14 @@ class Order
                 $orderProduct['product_name'] = $product['name'];
                 $orderProduct['product_price'] = $product['price'];
                 $orderProduct['product_number'] = $product['count'];
+                $orderProduct['snap_img'] = $product['main_img'];
+                $orderProduct['snap_img_id'] = $product['img_id'];
                 array_push($orderProducts, $orderProduct);
             }
             
 //            $newOrderGoods = new OrderProduct();
 //            $newOrderGoods->allowField(true)->saveAll($orderProducts);   //使用关联新增的方式没有 allowField 这样的方法对非数据表字段进行过滤
-            $newOrder->orderGoods()->saveAll($orderProducts);
+            $newOrder->orderProduct()->saveAll($orderProducts);
             Db::commit();
         } catch (Exception $ex) {
             Db::rollback();
@@ -120,8 +122,8 @@ class Order
         }
 
         $products = ProductModel::all($oProductsIDs)
-            ->visible(['id', 'name', 'price', 'stock', 'main_img_url'])
-            ->toArray();
+            ->visible(['id', 'name', 'price', 'stock', 'main_img_url', 'img_id']);
+//            ->toArray();
 
         return $products;
     }
@@ -185,6 +187,9 @@ class Order
                 $productStatus['name'] = $products[$i]['name'];
                 $productStatus['count'] = $oCount;  //购买的商品数量
                 $productStatus['price'] = $products[$i]['price'];
+//                $productStatus['main_img'] = $products[$i]['main_img_url'];
+                $productStatus['main_img'] = $products[$i]->getData('main_img_url');    //去掉图片地址域名前缀再入库
+                $productStatus['img_id'] = $products[$i]['img_id'];
                 $productStatus['total_price'] = $products[$i]['price'] * $oCount;
                 $productStatus['stock_enough'] = $products[$i]['stock'] >= $oCount ? true : false;
                 return $productStatus;

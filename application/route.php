@@ -26,12 +26,15 @@ Route::group('product', function() {
 Route::get('category', 'api/category/getallcategories');
 
 Route::post('token/user', 'api/token/gettoken');
+Route::post('token/verify', 'api/token/verify');
 
 Route::post('address', 'api/address/createupdateuseraddress');
+Route::get('address', 'api/address/getUserAddress');
 
 Route::post('order', 'api/order/placeOrder');
 Route::get('order/by_user', 'api/order/getorderbyuser');
 Route::get('order/detail', 'api/order/getdetail');
+Route::post('order/cancel/:id', 'api/order/cancel');
 
 Route::post('pay/prepay', 'api/pay/getPrepayOrder');
 Route::post('pay/notify', 'api/pay/receiveNotify');

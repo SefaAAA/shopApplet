@@ -66,8 +66,9 @@ class Token extends BaseService
     }
 
     /**
-     * @param $loginRes
-     * @return mixed
+     * 根据 code 换取的登录态信息创建本地用户登录态信息并保存到缓存
+     * @param array $loginRes 微信授权登录返回的结果集
+     * @return mixed 返回生成的用户令牌（token）
      */
     public function grantToken($loginRes)
     {
@@ -79,7 +80,6 @@ class Token extends BaseService
         if (is_null($user)) {
             //此处有类似于下单“超单”的问题，暂不处理
             $maxID = UserModel::order('id desc')->limit(1)->value('id');
-
             $nicknameSuffix = empty($maxID) ? 1 : $maxID + 1;
 
             $newUser = UserModel::create([
@@ -104,7 +104,8 @@ class Token extends BaseService
     {
         $cacheValue = array_merge($loginRes, [
             'uid' => $uid,
-            'scope' => ScopeEnum::User, //缓存身份权限标识
+//            'scope' => ScopeEnum::User, //缓存身份权限标识
+            'scope' => 15, //缓存身份权限标识
         ]);
         $value = json_encode($cacheValue);
         $key = self::generateToken();
@@ -160,7 +161,7 @@ class Token extends BaseService
      * @throws Exception
      * @throws SefaException
      */
-    public function needPrimaryScope()
+    public static function needPrimaryScope()
     {
         $scope = self::getCurrentUserTokenVar('scope');
 
@@ -174,7 +175,7 @@ class Token extends BaseService
      * @throws Exception
      * @throws SefaException
      */
-    public function needExclusiveScope()
+    public static function needExclusiveScope()
     {
         $scope = self::getCurrentUserTokenVar('scope');
 
@@ -188,5 +189,10 @@ class Token extends BaseService
         $currentUID = self::getCurrentUID();
 
         return $dataUID == $currentUID ? true : false;
+    }
+
+    public static function verifyToken($token)
+    {
+        $userToken = Cache::get('token') == $token;
     }
 }

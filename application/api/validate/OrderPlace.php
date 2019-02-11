@@ -12,7 +12,7 @@ namespace app\api\validate;
 class OrderPlace extends BaseValidate
 {
     protected $rule = [
-        'products' => 'checkProducts'
+        'products' => 'require|checkProducts'
     ];
 
     protected $message = [

@@ -12,8 +12,8 @@ namespace app\api\validate;
 class PagingParameter extends BaseValidate
 {
     protected $rule = [
-        'page' => 'require|isPositiveInteger',
-        'size' => 'require|isPositiveInteger'
+        'page' => 'isPositiveInteger',
+        'size' => 'isPositiveInteger'
     ];
 
     protected $message = [
