@@ -104,8 +104,8 @@ class Token extends BaseService
     {
         $cacheValue = array_merge($loginRes, [
             'uid' => $uid,
-//            'scope' => ScopeEnum::User, //缓存身份权限标识
-            'scope' => 15, //缓存身份权限标识
+            'scope' => ScopeEnum::User, //缓存身份权限标识
+//            'scope' => 15, //缓存身份权限标识
         ]);
         $value = json_encode($cacheValue);
         $key = self::generateToken();
@@ -193,6 +193,6 @@ class Token extends BaseService
 
     public static function verifyToken($token)
     {
-        $userToken = Cache::get('token') == $token;
+        return Cache::get('token') == $token ? true :false;
     }
 }
