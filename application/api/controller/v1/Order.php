@@ -1,6 +1,6 @@
 <?php
 
-namespace app\api\controller;
+namespace app\api\controller\v1;
 
 use app\api\model\OrderInfo;
 use app\api\service\Order as OrderService;

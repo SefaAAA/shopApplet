@@ -12,32 +12,32 @@
 use think\Route;
 
 // 动态注册路由
-Route::get('banner/:id', 'api/banner/getbanner');
+Route::get('api/:version/banner/:id', 'api/:version.banner/getbanner');
 
-Route::get('theme', 'api/theme/getsimplelist');
-Route::get('theme/:id', 'api/theme/getcomplexone');
+Route::get('api/:version/theme', 'api/:version.theme/getsimplelist');
+Route::get('api/:version/theme/:id', 'api/:version.theme/getcomplexone');
 
-Route::group('product', function() {
-    Route::get('recent', 'api/product/getrecent');
-    Route::get('by_category/:id', 'api/product/getbycatid');
-    Route::get(':id', 'api/product/getone');
+Route::group('api/:version/product', function() {
+    Route::get('recent', 'api/:version.product/getrecent');
+    Route::get('by_category/:id', 'api/:version.product/getbycatid');
+    Route::get(':id', 'api/:version.product/getone');
 }, [], ['id' => '\d+']);
 
-Route::get('category', 'api/category/getallcategories');
+Route::get('api/:version/category', 'api/:version.category/getallcategories');
 
-Route::post('token/user', 'api/token/gettoken');
-Route::post('token/verify', 'api/token/verify');
+Route::post('api/:version/token/user', 'api/:version.token/gettoken');
+Route::post('api/:version/token/verify', 'api/:version.token/verify');
 
-Route::post('address', 'api/address/createupdateuseraddress');
-Route::get('address', 'api/address/getUserAddress');
+Route::post('api/:version/address', 'api/:version.address/createupdateuseraddress');
+Route::get('api/:version/address', 'api/:version.address/getUserAddress');
 
-Route::post('order', 'api/order/placeOrder');
-Route::get('order/by_user', 'api/order/getorderbyuser');
-Route::get('order/detail', 'api/order/getdetail');
-Route::post('order/cancel/:id', 'api/order/cancel');
+Route::post('api/:version/order', 'api/:version.order/placeOrder');
+Route::get('api/:version/order/by_user', 'api/:version.order/getorderbyuser');
+Route::get('api/:version/order/detail', 'api/:version.order/getdetail');
+Route::post('api/:version/order/cancel/:id', 'api/:version.order/cancel');
 
-Route::post('pay/prepay', 'api/pay/getPrepayOrder');
-Route::post('pay/notify', 'api/pay/receiveNotify');
+Route::post('api/:version/pay/prepay', 'api/:version.pay/getPrepayOrder');
+Route::post('api/:version/pay/notify', 'api/:version.pay/receiveNotify');
 
 return [
     '__pattern__' => [
