@@ -1,6 +1,6 @@
 <?php
 
-namespace app\api\controller;
+namespace app\api\controller\v1;
 
 use app\api\model\User as UserModel;
 use app\api\service\Token as TokenService;
